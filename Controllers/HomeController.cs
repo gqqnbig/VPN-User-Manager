@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 
 namespace VPN.Controllers
 {
@@ -14,8 +17,15 @@ namespace VPN.Controllers
         }
 
         [HttpPost]
-        public ActionResult ChangePassword()
+        public ActionResult ChangePassword(string userName, string password, string newPassword)
         {
+
+            using (var context = new PrincipalContext(ContextType.Machine))
+            using (var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, userName))
+            {
+                user.ChangePassword(password, newPassword);
+            }
+
             ViewBag.IsChangeSuccessful = true;
 
 

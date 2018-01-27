@@ -3,11 +3,11 @@
 
     @using (Html.BeginForm("ChangePassword", "Home"))
     {
-        <label class="form-group">User Name <input type="text" id="username" /></label>
-        <label>Password <input type="password" id="password" /></label>
-        <label>New Password <input type="password" id="newPassword" /></label>
+        <label class="form-group">User Name <input type="text" name="username" /></label>
+        <label>Password <input type="password" name="password" /></label>
+        <label>New Password <input type="password" name="newPassword" /></label>
 
-        <label>Repeat New Password <input type="password" id="newPassword2" /></label>
+        <label>Repeat New Password <input type="password" name="newPassword2" /></label>
 
         <input type="submit" />
     }
