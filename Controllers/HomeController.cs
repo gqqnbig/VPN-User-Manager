@@ -45,7 +45,7 @@ namespace VPN.Controllers
                     var json = JObject.Parse(jsonString);
                     if (Convert.ToBoolean(json["success"]) == false)
                     {
-                        throw new UnauthorizedAccessException("CAPTCHA validation failed.");
+                        throw new UnauthorizedAccessException("CAPTCHA validation failed. \n" + jsonString);
                     }
                 }
 
@@ -63,6 +63,16 @@ namespace VPN.Controllers
             catch (NullReferenceException)
             {
                 ViewBag.PasswordMessage = "User is not found.";
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                EventLog myLog = new EventLog();
+                myLog.Source = "VPN User Manager";
+
+                // Write an informational entry to the event log.    
+                myLog.WriteEntry("Error in validating user input: " + e.Message, EventLogEntryType.Warning);
+
+                ViewBag.PasswordMessage = "CAPTCHA validation failed.";
             }
             catch (Exception e)
             {
