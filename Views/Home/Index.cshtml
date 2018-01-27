@@ -12,9 +12,6 @@
         <input type="submit" />
     }
 
-    @if (Convert.ToBoolean(ViewBag.IsChangeSuccessful))
-    {
-        <div>Password is changed!</div>
-    }
+    <div>@ViewBag.PasswordMessage</div>
 
 </div>
