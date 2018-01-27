@@ -8,8 +8,19 @@
         <label>New Password <input type="password" name="newPassword" /></label>
 
         <label>Repeat New Password <input type="password" name="newPassword2" /></label>
+        
+        <button
+            class="g-recaptcha"
+            data-sitekey="6Lel3UIUAAAAAJQXzDlRAkaKDdlit0Z7jPgDUvi3"
+            data-callback="submit">
+            Submit
+        </button>
 
-        <input type="submit" />
+        <script>
+            function submit() {
+                $("form").submit();
+            }
+        </script>
     }
 
     <div>@ViewBag.PasswordMessage</div>
