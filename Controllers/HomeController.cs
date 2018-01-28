@@ -10,6 +10,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using NetFwTypeLib;
 
 namespace VPN.Controllers
 {
@@ -55,7 +56,16 @@ namespace VPN.Controllers
                 using (var context = new PrincipalContext(ContextType.Machine))
                 using (var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, userName))
                 {
-                    user.ChangePassword(password, newPassword);
+                    using (var group = new GroupPrincipal(context, "VPN Customers"))
+                    {
+                        if (user.IsMemberOf(group) == false)
+                        {
+                            Firewall.BlockIPInFirewall(Request.UserHostAddress);
+                            throw new UnauthorizedAccessException($"User {userName} doesn't belong to group VPN Customers.");
+                        }
+                        user.ChangePassword(password, newPassword);
+                    }
+
                 }
 
                 ViewBag.PasswordMessage = "Password is changed.";
@@ -70,9 +80,9 @@ namespace VPN.Controllers
                 myLog.Source = "VPN User Manager";
 
                 // Write an informational entry to the event log.    
-                myLog.WriteEntry("Error in validating user input: " + e.Message, EventLogEntryType.Warning);
+                myLog.WriteEntry("Error in validating user: " + e.Message, EventLogEntryType.Warning);
 
-                ViewBag.PasswordMessage = "CAPTCHA validation failed.";
+                ViewBag.PasswordMessage = "Validation failed.";
             }
             catch (Exception e)
             {
@@ -81,6 +91,78 @@ namespace VPN.Controllers
 
 
             return View("Index");
+        }
+
+
+    }
+
+
+
+    public class Firewall
+    {
+
+        public static void BlockIPInFirewall(string sourceIP)
+        {
+            const string ruleName = "Block Malicious IP";
+
+            string blockRange;
+            if (sourceIP.Contains("."))
+            {
+                blockRange = sourceIP.Substring(0, sourceIP.LastIndexOf('.')) + ".0/24";
+            }
+            else
+            {
+                blockRange= sourceIP.Substring(0, sourceIP.LastIndexOf(':')) + ":0/112";
+            }
+
+
+
+            var firewallRule = GetFirewallRule(ruleName);
+            if (firewallRule == null)
+            {
+                INetFwPolicy2 fwPolicy2 = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+                var currentProfiles = fwPolicy2.CurrentProfileTypes;
+
+                // Let's create a new rule
+
+                INetFwRule2 inboundRule = (INetFwRule2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
+                inboundRule.Name = ruleName;
+                inboundRule.Enabled = true;
+                inboundRule.Protocol = 6; // TCP
+                inboundRule.RemoteAddresses = blockRange;
+                inboundRule.Action = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
+
+                inboundRule.Profiles = currentProfiles;
+
+
+                fwPolicy2.Rules.Add(inboundRule);
+            }
+            else
+            {
+                firewallRule.RemoteAddresses += "," + blockRange;
+            }
+
+
+
+        }
+
+        private static INetFwRule GetFirewallRule(string ruleName)
+        {
+            var fwPolicy2 = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+
+
+            foreach (INetFwRule rule in fwPolicy2.Rules)
+            {
+                // Add rule to list
+                //RuleList.Add(rule);
+                // Console.WriteLine(rule.Name);
+                if (rule.Name == ruleName)
+                {
+                    return rule;
+                }
+            }
+
+            return null;
         }
     }
 }
