@@ -3,9 +3,9 @@
 
     @using (Html.BeginForm("ChangePassword", "Home"))
     {
-        <label class="form-group">User Name <input type="text" name="username" /></label>
-        <label>Password <input type="password" name="password" /></label>
-        <label>New Password <input type="password" name="newPassword" /></label>
+        <label class="form-group">User Name @Html.TextBox("username")</label>
+        <label>Password @Html.Password("password")</label>
+        <label>New Password @Html.Password("newPassword")</label>
 
         <label>Repeat New Password <input type="password" name="newPassword2" /></label>
         
@@ -23,6 +23,6 @@
         </script>
     }
 
-    <div>@ViewBag.PasswordMessage</div>
+    <div>@Html.Display("PasswordMessage")</div>
 
 </div>
