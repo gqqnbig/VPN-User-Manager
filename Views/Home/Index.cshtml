@@ -3,7 +3,8 @@
 
     @using (Html.BeginForm("Index", "Home"))
     {
-        <label class="form-group">User Name @Html.TextBox("username")</label>
+        <label class="form-group">User Name @Html.TextBox("userName")</label>
+        @Html.ValidationMessage("userName")
         <label>Password @Html.Password("password")</label>
         <label>New Password @Html.Password("newPassword")</label>
 

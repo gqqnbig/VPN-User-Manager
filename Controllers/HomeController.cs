@@ -74,7 +74,7 @@ namespace VPN.Controllers
             }
             catch (NullReferenceException)
             {
-                ViewBag.PasswordMessage = "User is not found.";
+                ModelState.AddModelError("userName", "User is not found.");
             }
             catch (UnauthorizedAccessException e)
             {
