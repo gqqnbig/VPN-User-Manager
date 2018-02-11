@@ -16,12 +16,14 @@ namespace VPN.Controllers
 {
     public class HomeController : AsyncController
     {
+        [HttpGet]
         public ActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
+        [ActionName("Index")]
         public async Task<ActionResult> ChangePassword(string userName, string password, string newPassword)
         {
 
