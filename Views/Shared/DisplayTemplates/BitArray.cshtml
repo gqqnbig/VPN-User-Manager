@@ -1,0 +1,30 @@
+﻿@model System.Collections.BitArray
+
+<span class="sr-only">
+	@{ 
+		int[] array = new int[1];
+		Model.CopyTo(array, 0);
+		<text>@array[0]</text>
+	}
+</span>
+
+
+@{
+	var meetFirst1 = false;
+
+	for (int i = Model.Length - 1; i >= 0; i--)
+	{
+		if (Model[i])
+		{
+			meetFirst1 = true;
+			<span class="one"></span>
+		}
+		else
+		{
+			if (meetFirst1)
+			{
+				<span class="zero"></span>
+			}
+		}
+	}
+}
