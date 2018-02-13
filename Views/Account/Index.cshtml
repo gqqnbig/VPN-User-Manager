@@ -1,4 +1,6 @@
-﻿<h2>Welcome, @User.Identity.Name</h2>
+﻿@model VPN.Account.IndexViewModel
+<h2>Welcome, @User.Identity.Name</h2>
 
 
 
+Last login Date: @Html.DisplayFor(Model =>Model.LastLoginDate)

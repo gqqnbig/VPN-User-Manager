@@ -1,0 +1,21 @@
+﻿@model DateTime?
+@*Nullable models have the same name as the base type.*@
+
+@if (Model == null)
+{
+	<text>N/A</text>
+}
+else
+{
+	@Model.Value.ToLongDateString();
+
+	var hour = new System.Collections.BitArray(BitConverter.GetBytes(Model.Value.Hour));
+	@Html.DisplayFor(Model => hour)
+	<span>:</span>
+	var minute = new System.Collections.BitArray(BitConverter.GetBytes(Model.Value.Minute));
+	@Html.DisplayFor(Model => minute)
+	<span>:</span>
+	var second = new System.Collections.BitArray(BitConverter.GetBytes(Model.Value.Second));
+	@Html.DisplayFor(Model => second)
+
+}
