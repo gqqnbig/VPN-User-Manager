@@ -43,7 +43,7 @@ namespace VPN
 
             try
             {
-                isAuthenticated = principalContext.ValidateCredentials(username, password, ContextOptions.Negotiate);
+                isAuthenticated = principalContext.ValidateCredentials(username, password);
                 if (isAuthenticated)
                 {
                     userPrincipal = UserPrincipal.FindByIdentity(principalContext, username);
