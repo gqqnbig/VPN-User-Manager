@@ -76,7 +76,12 @@ namespace VPN.Home
             var authService = new AdAuthenticationService(authenticationManager);
             var authenticationResult = authService.SignIn(model.Username, model.Password);
             if (authenticationResult.IsSuccess)
-                return RedirectToLocal(returnUrl);
+            {
+                if (string.IsNullOrEmpty(returnUrl))
+                    return RedirectToAction("Index", "Account");
+                else
+                    return RedirectToLocal(returnUrl);
+            }
 
             ModelState.AddModelError(string.Empty, authenticationResult.ErrorMessage);
 
