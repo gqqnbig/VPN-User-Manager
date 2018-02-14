@@ -4,3 +4,18 @@
 
 
 Last login Date: @Html.DisplayFor(Model =>Model.LastLoginDate)
+
+
+
+@using (Html.BeginForm("Index", "Account"))
+{
+	var input = new VPN.Account.AddProductInputModel();
+
+	@Html.EditorFor(Model=> input)
+
+	<input type="submit" value="Submit">
+}
+
+@Html.Display()
+
+@Html.DisplayFor(Model=>Model.Products)

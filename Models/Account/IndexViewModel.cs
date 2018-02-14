@@ -8,5 +8,8 @@ namespace VPN.Account
 	public class IndexViewModel //Three types of models: input model, output model (view model), and domain model.
 	{
 		public  DateTime? LastLoginDate { get; set; }
+
+
+		public IEnumerable<ProductViewModel> Products { get; set; }
 	}
 }
