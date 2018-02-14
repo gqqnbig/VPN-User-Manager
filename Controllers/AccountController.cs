@@ -8,7 +8,7 @@ using System.Web.Mvc;
 namespace VPN.Account
 {
 
-    [Authorize(Roles = "VPN Customers")]
+    [Authorize()]
     public class AccountController : Controller
     {
 		[HttpGet]
