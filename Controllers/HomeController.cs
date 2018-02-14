@@ -10,9 +10,10 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using NetFwTypeLib;
+using System.Web.Security;
+using Microsoft.Owin.Security;
 
-namespace VPN.Controllers
+namespace VPN.Home
 {
     public class HomeController : AsyncController
     {
@@ -22,149 +23,84 @@ namespace VPN.Controllers
             return View();
         }
 
+        //[HttpPost]
+        //[ActionName("Index")]
+        //public async Task<ActionResult> ChangePassword(string userName, string password, string newPassword)
+        //{
+        //    string gRecaptchaResponse = Request.Form["g-recaptcha-response"];
+
+
+        //    UriBuilder uriBuilder = new UriBuilder("https://www.google.com/recaptcha/api/siteverify");
+        //    var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+        //    query["secret"] = System.Configuration.ConfigurationManager.AppSettings["GoogleReCAPTCHASecretKey"];
+        //    query["response"] = gRecaptchaResponse;
+        //    uriBuilder.Query = query.ToString();
+
+        //    WebRequest webRequest = WebRequest.CreateHttp(uriBuilder.ToString());
+        //    webRequest.Method = "POST";
+        //    webRequest.ContentLength = 0;
+        //    var response = await webRequest.GetResponseAsync();
+        //    using (var sr = new StreamReader(response.GetResponseStream()))
+        //    {
+        //        var jsonString = sr.ReadToEnd();
+        //        var json = JObject.Parse(jsonString);
+        //        if (Convert.ToBoolean(json["success"]) == false)
+        //        {
+        //            throw new UnauthorizedAccessException("CAPTCHA validation failed. \n" + jsonString);
+        //        }
+        //    }
+
+
+
+        //    if (Membership.ValidateUser(userName, password))
+        //    {
+        //        FormsAuthentication.SetAuthCookie(userName, true);
+        //        return RedirectToAction("Index", "Account");
+        //    }
+
+
+
+        //    return View("Index");
+        //}
+
+
         [HttpPost]
-        [ActionName("Index")]
-        public async Task<ActionResult> ChangePassword(string userName, string password, string newPassword)
+        [AllowAnonymous]
+        public ActionResult Index(LoginViewModel model, string returnUrl)
         {
 
-            try
-            {
-                string gRecaptchaResponse = Request.Form["g-recaptcha-response"];
+            if (!ModelState.IsValid)
+                return View(model);
 
+            IAuthenticationManager authenticationManager = HttpContext.GetOwinContext().Authentication;
+            var authService = new AdAuthenticationService(authenticationManager);
+            var authenticationResult = authService.SignIn(model.Username, model.Password);
+            if (authenticationResult.IsSuccess)
+                return RedirectToLocal(returnUrl);
 
-                UriBuilder uriBuilder = new UriBuilder("https://www.google.com/recaptcha/api/siteverify");
-                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-                query["secret"] = System.Configuration.ConfigurationManager.AppSettings["GoogleReCAPTCHASecretKey"];
-                query["response"] = gRecaptchaResponse;
-                uriBuilder.Query = query.ToString();
+            ModelState.AddModelError(string.Empty, authenticationResult.ErrorMessage);
 
-                WebRequest webRequest = WebRequest.CreateHttp(uriBuilder.ToString());
-                webRequest.Method = "POST";
-                webRequest.ContentLength = 0;
-                var response = await webRequest.GetResponseAsync();
-                using (var sr = new StreamReader(response.GetResponseStream()))
-                {
-                    var jsonString = sr.ReadToEnd();
-                    var json = JObject.Parse(jsonString);
-                    if (Convert.ToBoolean(json["success"]) == false)
-                    {
-                        throw new UnauthorizedAccessException("CAPTCHA validation failed. \n" + jsonString);
-                    }
-                }
+            return View(model);
+        }
 
+        public ActionResult LogOff()
+        {
+            IAuthenticationManager authenticationManager = HttpContext.GetOwinContext().Authentication;
+            authenticationManager.SignOut(MyAuthentication.ApplicationCookie);
 
-
-
-                using (var context = new PrincipalContext(ContextType.Machine))
-                using (var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, userName))
-                {
-                    using (var group = new GroupPrincipal(context, "VPN Customers"))
-                    {
-                        if (user.IsMemberOf(group) == false)
-                        {
-                            Firewall.BlockIPInFirewall(Request.UserHostAddress);
-                            throw new UnauthorizedAccessException($"User {userName} doesn't belong to group VPN Customers.");
-                        }
-                        user.ChangePassword(password, newPassword);
-                    }
-
-                }
-
-                ViewBag.PasswordMessage = "Password is changed.";
-            }
-            catch (NullReferenceException)
-            {
-                ModelState.AddModelError("userName", "User is not found.");
-            }
-            catch (UnauthorizedAccessException e)
-            {
-                EventLog myLog = new EventLog();
-                myLog.Source = "VPN User Manager";
-
-                // Write an informational entry to the event log.    
-                myLog.WriteEntry("Error in validating user: " + e.Message, EventLogEntryType.Warning);
-
-                ViewBag.PasswordMessage = "Validation failed.";
-            }
-            catch (Exception e)
-            {
-                ViewBag.PasswordMessage = e.Message;
-            }
-
-
-            return View("Index");
+            return RedirectToAction("Index");
         }
 
 
-    }
 
-
-
-    public class Firewall
-    {
-
-        public static void BlockIPInFirewall(string sourceIP)
+        private ActionResult RedirectToLocal(string returnUrl)
         {
-            const string ruleName = "Block Malicious IP";
-
-            string blockRange;
-            if (sourceIP.Contains("."))
+            if (Url.IsLocalUrl(returnUrl))
             {
-                blockRange = sourceIP.Substring(0, sourceIP.LastIndexOf('.')) + ".0/24";
+                return Redirect(returnUrl);
             }
-            else
-            {
-                blockRange= sourceIP.Substring(0, sourceIP.LastIndexOf(':')) + ":0/112";
-            }
-
-
-
-            var firewallRule = GetFirewallRule(ruleName);
-            if (firewallRule == null)
-            {
-                INetFwPolicy2 fwPolicy2 = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
-                var currentProfiles = fwPolicy2.CurrentProfileTypes;
-
-                // Let's create a new rule
-
-                INetFwRule2 inboundRule = (INetFwRule2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
-                inboundRule.Name = ruleName;
-                inboundRule.Enabled = true;
-                inboundRule.Protocol = 6; // TCP
-                inboundRule.RemoteAddresses = blockRange;
-                inboundRule.Action = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
-
-                inboundRule.Profiles = currentProfiles;
-
-
-                fwPolicy2.Rules.Add(inboundRule);
-            }
-            else
-            {
-                firewallRule.RemoteAddresses += "," + blockRange;
-            }
-
-
-
+            return RedirectToAction("Index", "Home");
         }
 
-        private static INetFwRule GetFirewallRule(string ruleName)
-        {
-            var fwPolicy2 = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
-
-
-            foreach (INetFwRule rule in fwPolicy2.Rules)
-            {
-                // Add rule to list
-                //RuleList.Add(rule);
-                // Console.WriteLine(rule.Name);
-                if (rule.Name == ruleName)
-                {
-                    return rule;
-                }
-            }
-
-            return null;
-        }
     }
 }

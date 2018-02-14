@@ -1,30 +1,49 @@
-﻿<div>
-    <h1>Change VPN user password</h1>
+﻿@model VPN.Home.LoginViewModel
 
-    @using (Html.BeginForm("Index", "Home"))
-    {
-        <label class="form-group">User Name @Html.TextBox("userName")</label>
-        @Html.ValidationMessage("userName")
-        <label>Password @Html.Password("password")</label>
-        <label>New Password @Html.Password("newPassword")</label>
 
-        <label>Repeat New Password <input type="password" name="newPassword2" /></label>
-        
-        <button
-            class="g-recaptcha"
-            data-sitekey="6Lel3UIUAAAAAJQXzDlRAkaKDdlit0Z7jPgDUvi3"
-            data-callback="submit">
-            Submit
-        </button>
 
-        <script>
-            function submit() {
-                $("form").submit();
-            }
-        </script>
-    }
+<div>
+    <div class="row">
+        <div class="col-md-8">
+            <section id="loginForm">
+                @using (Html.BeginForm("Index", "Home", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <hr />
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Username, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <button class="g-recaptcha btn btn-primary"
+                                    data-sitekey="6Lel3UIUAAAAAJQXzDlRAkaKDdlit0Z7jPgDUvi3"
+                                    data-callback="submit">
+                                Submit
+                            </button>
 
-    <div>@Html.Display("PasswordMessage")</div>
+                            <script>
+                                function submit() {
+                                    $("form").submit();
+                                }
+                            </script>
+                        </div>
+                    </div>
+                }
+            </section>
+        </div>
+    </div>
 
 </div>
 
