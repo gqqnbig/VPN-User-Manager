@@ -161,7 +161,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\AdAuthenticationService.cs" />
+    <Compile Include="Shared\AdAuthenticationService.cs" />
     <Compile Include="App_Code\Firewall.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
