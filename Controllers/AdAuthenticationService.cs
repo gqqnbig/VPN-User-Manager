@@ -35,7 +35,7 @@ namespace VPN
 
         public AuthenticationResult SignIn(string username, string password)
         {
-            ContextType authenticationType = ContextType.Machine;
+			ContextType authenticationType = username.Contains("\\") ? ContextType.Domain : ContextType.Machine;
 
             PrincipalContext principalContext = new PrincipalContext(authenticationType);
             bool isAuthenticated = false;
