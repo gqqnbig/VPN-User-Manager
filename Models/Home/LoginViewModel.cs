@@ -6,6 +6,7 @@ namespace VPN.Home
     public class LoginViewModel
     {
         [Required, AllowHtml]
+		[RegularExpression(@"([\d\w]+\\)?[\d\w]+", ErrorMessage = "/ is invalid character. If you want to enter domain, use \\.")]
         public string Username { get; set; }
 
         [Required]
