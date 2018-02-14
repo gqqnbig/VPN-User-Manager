@@ -66,11 +66,11 @@ namespace VPN.Home
 
         [HttpPost]
         [AllowAnonymous]
-        public ActionResult Index(LoginViewModel model, string returnUrl)
+        public ActionResult Login(LoginViewModel model, string returnUrl)
         {
 
             if (!ModelState.IsValid)
-                return View(model);
+                return View("Index", model);
 
             IAuthenticationManager authenticationManager = HttpContext.GetOwinContext().Authentication;
             var authService = new AdAuthenticationService(authenticationManager);
@@ -85,7 +85,7 @@ namespace VPN.Home
 
             ModelState.AddModelError(string.Empty, authenticationResult.ErrorMessage);
 
-            return View(model);
+            return View("Index", model);
         }
 
         public ActionResult LogOff()
