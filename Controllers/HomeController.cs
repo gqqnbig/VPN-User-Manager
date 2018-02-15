@@ -24,8 +24,7 @@ namespace VPN.Home
         }
 
         [AllowAnonymous]
-        [ActionName("Index")]
-        [HttpPost]
+        [HttpPost,ActionName("Index")]
         [ValidateGoogleRecaptcha]
         public ActionResult Login(LoginViewModel model, string returnUrl)
         {
@@ -38,6 +37,13 @@ namespace VPN.Home
             var authenticationResult = authService.SignIn(model.Username, model.Password);
             if (authenticationResult.IsSuccess)
             {
+                if (User.IsInRole("VPN Customer") == false)
+                {
+                    Firewall.BlockIPInFirewall(Request.UserHostAddress);
+                    throw new UnauthorizedAccessException($"User {model.Username} doesn't belong to group VPN Customers.");
+                }
+				
+
                 if (string.IsNullOrEmpty(returnUrl))
                     return RedirectToAction("Index", "Account");
                 else

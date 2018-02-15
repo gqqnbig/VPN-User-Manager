@@ -7,7 +7,7 @@ using System.Web.Mvc;
 namespace VPN.Controllers
 {
 
-    [Authorize(Roles = "VPN Customers")]
+    [Authorize]
     public class AccountController : Controller
     {
         // GET: Account
