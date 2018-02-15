@@ -15,7 +15,7 @@ using Microsoft.Owin.Security;
 
 namespace VPN.Home
 {
-    public class HomeController : AsyncController
+    public class HomeController : Controller
     {
         [HttpGet]
         public ActionResult Index()
@@ -23,49 +23,10 @@ namespace VPN.Home
             return View();
         }
 
-        //[HttpPost]
-        //[ActionName("Index")]
-        //public async Task<ActionResult> ChangePassword(string userName, string password, string newPassword)
-        //{
-        //    string gRecaptchaResponse = Request.Form["g-recaptcha-response"];
-
-
-        //    UriBuilder uriBuilder = new UriBuilder("https://www.google.com/recaptcha/api/siteverify");
-        //    var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-        //    query["secret"] = System.Configuration.ConfigurationManager.AppSettings["GoogleReCAPTCHASecretKey"];
-        //    query["response"] = gRecaptchaResponse;
-        //    uriBuilder.Query = query.ToString();
-
-        //    WebRequest webRequest = WebRequest.CreateHttp(uriBuilder.ToString());
-        //    webRequest.Method = "POST";
-        //    webRequest.ContentLength = 0;
-        //    var response = await webRequest.GetResponseAsync();
-        //    using (var sr = new StreamReader(response.GetResponseStream()))
-        //    {
-        //        var jsonString = sr.ReadToEnd();
-        //        var json = JObject.Parse(jsonString);
-        //        if (Convert.ToBoolean(json["success"]) == false)
-        //        {
-        //            throw new UnauthorizedAccessException("CAPTCHA validation failed. \n" + jsonString);
-        //        }
-        //    }
-
-
-
-        //    if (Membership.ValidateUser(userName, password))
-        //    {
-        //        FormsAuthentication.SetAuthCookie(userName, true);
-        //        return RedirectToAction("Index", "Account");
-        //    }
-
-
-
-        //    return View("Index");
-        //}
-
-
-        [HttpPost]
         [AllowAnonymous]
+        [ActionName("Index")]
+        [HttpPost]
+        [ValidateGoogleRecaptcha]
         public ActionResult Login(LoginViewModel model, string returnUrl)
         {
 
