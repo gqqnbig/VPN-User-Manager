@@ -1,4 +1,11 @@
 ﻿<h2>Welcome, @User.Identity.Name</h2>
 
+@ViewData["Success"]
 
+@using (Html.BeginForm("Index", "Account"))
+{
+    <h1>Change Password</h1>
+    <label>New Password <input type="password" name="newPassword" /></label>
 
+    <input type="submit" value="Submit" />
+}
