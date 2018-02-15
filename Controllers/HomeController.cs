@@ -34,15 +34,17 @@ namespace VPN.Home
 
             IAuthenticationManager authenticationManager = HttpContext.GetOwinContext().Authentication;
             var authService = new AdAuthenticationService(authenticationManager);
+
+            var targetUser = authService.GetUser(model.Username);
+            if (targetUser != null && targetUser.GetGroups().All(g => g.Name != "VPN Customer"))
+            {
+                Firewall.BlockIPInFirewall(Request.UserHostAddress);
+                throw new UnauthorizedAccessException($"User {model.Username} doesn't belong to group VPN Customers.");
+            }
+
             var authenticationResult = authService.SignIn(model.Username, model.Password);
             if (authenticationResult.IsSuccess)
             {
-                if (User.IsInRole("VPN Customer") == false)
-                {
-                    Firewall.BlockIPInFirewall(Request.UserHostAddress);
-                    throw new UnauthorizedAccessException($"User {model.Username} doesn't belong to group VPN Customers.");
-                }
-				
 
                 if (string.IsNullOrEmpty(returnUrl))
                     return RedirectToAction("Index", "Account");

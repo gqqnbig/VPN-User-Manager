@@ -33,6 +33,26 @@ namespace VPN
             this.authenticationManager = authenticationManager;
         }
 
+
+
+        public UserPrincipal GetUser(string username)
+        {
+            ContextType authenticationType = username.Contains("\\") ? ContextType.Domain : ContextType.Machine;
+
+            PrincipalContext principalContext = new PrincipalContext(authenticationType);
+            UserPrincipal userPrincipal = null;
+
+            try
+            {
+                userPrincipal = UserPrincipal.FindByIdentity(principalContext, username);
+                return userPrincipal;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
         public AuthenticationResult SignIn(string username, string password)
         {
 			ContextType authenticationType = username.Contains("\\") ? ContextType.Domain : ContextType.Machine;
